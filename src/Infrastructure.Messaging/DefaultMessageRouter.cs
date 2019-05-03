@@ -21,10 +21,9 @@
             await foreach(var message in _messageReceiver.Receive(cancellationToken))
             {
                 var messageType = message.GetType();
-                var handler = _messageHandlersRegistry.For(messageType);
-                var handlerDelegate = _messageHandlersRegistry.AsDelegate(handler);
+                var handlerDelegate = _messageHandlersRegistry.HandlerDelegateFor(messageType);
 
-                ((Task)handlerDelegate.DynamicInvoke(message, cancellationToken)).GetAwaiter().GetResult();
+                handlerDelegate(message, cancellationToken);
             }
         }
     }

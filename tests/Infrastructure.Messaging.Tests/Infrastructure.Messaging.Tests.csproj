@@ -9,12 +9,12 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.2.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.0.1" />
     <PackageReference Include="xunit" Version="2.4.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Infrastructure.Messaging.InMemory\Infrastructure.Messaging.InMemory.csproj" />
     <ProjectReference Include="..\..\src\Infrastructure.Messaging\Infrastructure.Messaging.csproj" />
   </ItemGroup>
 

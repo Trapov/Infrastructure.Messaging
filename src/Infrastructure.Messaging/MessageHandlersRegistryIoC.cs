@@ -5,15 +5,14 @@
     using System.Linq;
     using System.Linq.Expressions;
     using System.Threading;
+    using System.Threading.Tasks;
     using Microsoft.Extensions.Logging;
 
     public sealed class MessageHandlersRegistryIoC : IMessageHandlersRegistry
     {
         private readonly ILogger<MessageHandlersRegistryIoC> _logger;
         private readonly IServiceProvider _serviceProvider;
-
-        private readonly IDictionary<Type, Type> _messageTypeToHandlerType;
-        private readonly IDictionary<Type, Delegate> _messageTypeToDelegateType;
+        private readonly IDictionary<Type, Handle<IMessage>> _messageTypeToDelegateType;
 
         public MessageHandlersRegistryIoC(
             ILoggerFactory loggerFactory,
@@ -21,56 +20,46 @@
         {
             _logger = loggerFactory.CreateLogger<MessageHandlersRegistryIoC>();
             _serviceProvider = serviceProvider;
-            _messageTypeToHandlerType = new Dictionary<Type, Type>();
-            _messageTypeToDelegateType = new Dictionary<Type, Delegate>();
+            _messageTypeToDelegateType = new Dictionary<Type, Handle<IMessage>>();
         }
 
         public void Register<TMessageHandler>()
+            where TMessageHandler : IMessageHandler
         {
             var messageHandlerType = typeof(TMessageHandler);
             var messageType = messageHandlerType.GetGenericArguments().First();
 
-            _messageTypeToHandlerType.Add(messageType, messageHandlerType);
-        }
-
-        public IMessageHandler For(Type messageType)
-        {
-            var messageHandlerType = _messageTypeToHandlerType[messageType];
-
-            _logger.LogTrace("Trying to get a message handler of the type {0}.", messageHandlerType);
-            var messageHandler = _serviceProvider.GetService(messageHandlerType);
-
-            return (IMessageHandler) messageHandler;
-        }
-
-        public Delegate AsDelegate(IMessageHandler handler)
-        {
-            var handlerTypeBase = handler.GetType().GetInterfaces().First(i => typeof(IMessageHandler).IsAssignableFrom(i) && i.IsGenericType);
-            var messageType = handlerTypeBase.GetGenericArguments().First();
-
-            if(_messageTypeToDelegateType.TryGetValue(messageType, out var @delegate))
-                return @delegate;
+            var handler = _serviceProvider.GetService(typeof(TMessageHandler));
 
             var handlerParam = Expression.Constant(handler);
 
-            var messageParam = Expression.Parameter(messageType, "message");
+            var messageParam = Expression.Parameter(typeof(IMessage), "message");
+            var messageVariableExact = Expression.Variable(messageType, "messageExact");
             var cancellationTokenParam = Expression.Parameter(typeof(CancellationToken), "cancellationToken");
 
-            var expression = Expression.Lambda(
+            var expression = Expression.Lambda<Func<IMessage, CancellationToken, Task>>(
                 Expression.Block(
+                    new[] { messageVariableExact },
+                    Expression.Assign(messageVariableExact, Expression.Convert(messageParam, messageType)),
                     Expression.Call(
                         handlerParam,
                         handlerParam.Type.GetMethod("Handle"),
-                        messageParam,
+                        messageVariableExact,
                         cancellationTokenParam
                     )
                 ),
                 messageParam,
                 cancellationTokenParam);
 
-            var act = expression.Compile();
-            _messageTypeToDelegateType.Add(messageType,act);
-            return act;
+            var handleFunc = (Handle<IMessage>)expression.Compile().Invoke;
+
+            _messageTypeToDelegateType.Add(messageType, handleFunc);
+        }
+
+
+        public Handle<IMessage> HandlerDelegateFor(Type messageType)
+        {
+            return _messageTypeToDelegateType[messageType];
         }
     }
 }

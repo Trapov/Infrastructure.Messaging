@@ -24,6 +24,13 @@
 
         public sealed class MockReceiver : IMessageReceiver
         {
+            private readonly IReadOnlyList<IMessage> _messages;
+
+            public MockReceiver(IReadOnlyList<IMessage> messages)
+            {
+                _messages = messages;
+            }
+
             public IAsyncEnumerable<IMessage> Receive(CancellationToken cancellationToken)
             {
                 return AsyncEnumerable.Range(0, 1).Select(d => new TestMessage());
@@ -35,11 +42,13 @@
         {
             var services = new ServiceCollection();
 
+            var messages = new[] { new TestMessage() };
+
             services
                 .AddLogging()
                 .AddSingleton<IMessageHandler<TestMessage>, TestMessageHandler>()
                 .AddSingleton<IMessageRouter, DefaultMessageRouter>()
-                .AddSingleton<IMessageReceiver, MockReceiver>()
+                .AddSingleton<IMessageReceiver>(new MockReceiver(messages))
                 .AddSingleton<IMessageHandlersRegistry, MessageHandlersRegistryIoC>();
 
             var serviceProvider = services.BuildServiceProvider();
