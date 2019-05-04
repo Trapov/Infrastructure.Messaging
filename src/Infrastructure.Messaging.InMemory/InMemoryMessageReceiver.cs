@@ -19,10 +19,10 @@
             _memoryPipe = memoryPipe;
         }
 
-        public IAsyncEnumerable<IMessage> Receive(CancellationToken cancellationToken)
+        public IAsyncEnumerable<HandlingProcessFor<IMessage>> Receive(CancellationToken cancellationToken)
         {
             return _memoryPipe.GetConsumingEnumerable(cancellationToken)
-                .Select(pm => _messagePacker.Unpack(pm.Item2, pm.Item1, cancellationToken).GetAwaiter().GetResult())
+                .Select(pm => new HandlingProcessFor<IMessage>(_messagePacker.Unpack(pm.Item2, pm.Item1, cancellationToken).GetAwaiter().GetResult(), () => { }))
                 .ToAsyncEnumerable();
         }
     }

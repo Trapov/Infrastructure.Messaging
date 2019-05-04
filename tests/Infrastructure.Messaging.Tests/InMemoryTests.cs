@@ -1,6 +1,7 @@
 ﻿namespace Infrastructure.Messaging.Tests
 {
     using Infrastructure.Messaging.InMemory;
+    using Infrastructure.Messaging.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection;
     using Newtonsoft.Json;
     using System;
@@ -35,8 +36,9 @@
                 .AddSingleton<IMessagePublisher, InMemoryMessagePublisher>()
                 .AddSingleton<TaskFactory>()
                 .AddSingleton<BlockingCollection<(Type, object)>, BlockingCollection<(Type, object)>>()
-                .AddSingleton<IMessageHandler<TestMessage>, TestMessageHandler>()
-                .AddSingleton<IMessageHandlersRegistry, MessageHandlersRegistryIoC>();
+                .AddIoCRegistryWithHandlers(
+                    (typeof(IMessageHandler<TestMessage>), typeof(TestMessageHandler))
+                );
 
             var serviceProvider = services.BuildServiceProvider();
 

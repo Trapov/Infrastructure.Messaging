@@ -1,6 +1,7 @@
 ﻿namespace Infrastructure.Messaging.Tests
 {
     using Microsoft.Extensions.DependencyInjection;
+    using Infrastructure.Messaging.Extensions.DependencyInjection;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
@@ -31,9 +32,9 @@
                 _messages = messages;
             }
 
-            public IAsyncEnumerable<IMessage> Receive(CancellationToken cancellationToken)
+            IAsyncEnumerable<HandlingProcessFor<IMessage>> IMessageReceiver.Receive(CancellationToken cancellationToken)
             {
-                return AsyncEnumerable.Range(0, 1).Select(d => new TestMessage());
+                return AsyncEnumerable.Range(0, 1).Select(d => new HandlingProcessFor<IMessage>(new TestMessage(), () => { }));
             }
         }
 
@@ -44,17 +45,17 @@
 
             var messages = new[] { new TestMessage() };
 
-            services
+            _ = services
                 .AddLogging()
-                .AddSingleton<IMessageHandler<TestMessage>, TestMessageHandler>()
+                .AddIoCRegistryWithHandlers(
+                    (typeof(IMessageHandler<TestMessage>), typeof(TestMessageHandler))
+                )
                 .AddSingleton<IMessageRouter, DefaultMessageRouter>()
-                .AddSingleton<IMessageReceiver>(new MockReceiver(messages))
-                .AddSingleton<IMessageHandlersRegistry, MessageHandlersRegistryIoC>();
+                .AddSingleton<IMessageReceiver>(new MockReceiver(messages));
 
             var serviceProvider = services.BuildServiceProvider();
 
             var registry = serviceProvider.GetRequiredService<IMessageHandlersRegistry>();
-            registry.Register<IMessageHandler<TestMessage>>();
             var router = serviceProvider.GetRequiredService<IMessageRouter>();
 
             router.Route(CancellationToken.None).GetAwaiter().GetResult();

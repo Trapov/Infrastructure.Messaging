@@ -30,12 +30,12 @@
             {
                 var logger = _loggerFactory.CreateLogger<RabbitMQMessagePublisher>();
 
-                var tryCount = 20;
+                var tryCount = 0;
                 var timeOut = TimeSpan.FromSeconds(4);
 
-                while (tryCount != 0)
+                while (tryCount != 20)
                 {
-                    Interlocked.Decrement(ref tryCount);
+                    Interlocked.Increment(ref tryCount);
                     try
                     {
                         var connection = connectionFactory.CreateConnection();

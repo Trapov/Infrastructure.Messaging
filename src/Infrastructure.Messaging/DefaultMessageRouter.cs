@@ -18,12 +18,13 @@
 
         public async Task Route(CancellationToken cancellationToken)
         {
-            await foreach(var message in _messageReceiver.Receive(cancellationToken))
+            await foreach(var handlingProcess in _messageReceiver.Receive(cancellationToken))
             {
-                var messageType = message.GetType();
+                var messageType = handlingProcess.Message.GetType();
                 var handlerDelegate = _messageHandlersRegistry.HandlerDelegateFor(messageType);
 
-                handlerDelegate(message, cancellationToken);
+                handlerDelegate(handlingProcess.Message, cancellationToken)
+                    .ContinueWith(t => handlingProcess.ToHandled(), cancellationToken);
             }
         }
     }

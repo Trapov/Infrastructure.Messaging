@@ -14,6 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Infrastructure.Messaging.Extensions.DependencyInjection\Infrastructure.Messaging.Extensions.DependencyInjection.csproj" />
     <ProjectReference Include="..\..\src\Infrastructure.Messaging.InMemory\Infrastructure.Messaging.InMemory.csproj" />
     <ProjectReference Include="..\..\src\Infrastructure.Messaging.RabbitMQ\Infrastructure.Messaging.RabbitMQ.csproj" />
     <ProjectReference Include="..\..\src\Infrastructure.Messaging\Infrastructure.Messaging.csproj" />

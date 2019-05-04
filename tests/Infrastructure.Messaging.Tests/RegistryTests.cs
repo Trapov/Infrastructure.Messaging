@@ -3,6 +3,7 @@ namespace Infrastructure.Messaging.Tests
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Extensions.DependencyInjection;
+    using Infrastructure.Messaging.Extensions.DependencyInjection;
     using Xunit;
 
     public sealed class RegistryTests
@@ -27,15 +28,15 @@ namespace Infrastructure.Messaging.Tests
 
             services
                 .AddLogging()
-                .AddSingleton<IMessageHandler<TestMessage>, TestMessageHandler>()
-                .AddSingleton<IMessageHandlersRegistry, MessageHandlersRegistryIoC>();
+                .AddIoCRegistryWithHandlers(
+                    (typeof(IMessageHandler<TestMessage>), typeof(TestMessageHandler))
+                );
 
             var serviceProvider = services.BuildServiceProvider();
 
             var registry = serviceProvider.GetRequiredService<IMessageHandlersRegistry>();
             Assert.NotNull(registry);
             Assert.IsType<MessageHandlersRegistryIoC>(registry);
-            registry.Register<IMessageHandler<TestMessage>>();
 
             var handler = registry.HandlerDelegateFor(typeof(TestMessage));
 
@@ -58,13 +59,13 @@ namespace Infrastructure.Messaging.Tests
 
             services
                 .AddLogging()
-                .AddSingleton<IMessageHandler<TestMessage>, TestMessageHandler>()
-                .AddSingleton<IMessageHandlersRegistry, MessageHandlersRegistryIoC>();
+                .AddIoCRegistryWithHandlers(
+                    (typeof(IMessageHandler<TestMessage>), typeof(TestMessageHandler))
+                );
 
             var serviceProvider = services.BuildServiceProvider();
 
             var registry = serviceProvider.GetRequiredService<IMessageHandlersRegistry>();
-            registry.Register<IMessageHandler<TestMessage>>();
 
             Assert.NotNull(registry);
             Assert.IsType<MessageHandlersRegistryIoC>(registry);

@@ -6,30 +6,45 @@
     using System.Linq.Expressions;
     using System.Threading;
     using System.Threading.Tasks;
+    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
 
     public sealed class MessageHandlersRegistryIoC : IMessageHandlersRegistry
     {
         private readonly ILogger<MessageHandlersRegistryIoC> _logger;
         private readonly IServiceProvider _serviceProvider;
-        private readonly IDictionary<Type, Handle<IMessage>> _messageTypeToDelegateType;
+
+        public IDictionary<Type, Handle<IMessage>> MessageTypeToDelegateType { get; }
 
         public MessageHandlersRegistryIoC(
             ILoggerFactory loggerFactory,
-            IServiceProvider serviceProvider)
+            IServiceProvider serviceProvider,
+            IServiceCollection serviceCollection)
         {
             _logger = loggerFactory.CreateLogger<MessageHandlersRegistryIoC>();
             _serviceProvider = serviceProvider;
-            _messageTypeToDelegateType = new Dictionary<Type, Handle<IMessage>>();
+            MessageTypeToDelegateType = new Dictionary<Type, Handle<IMessage>>();
+
+            var handlers = serviceCollection
+                .Where(sd =>
+                {
+                    return 
+                        sd.ServiceType != null &&
+                        typeof(IMessageHandler).IsAssignableFrom(sd.ServiceType);
+                });
+
+            foreach (var handler in handlers)
+                Register(handler.ServiceType);
         }
 
-        public void Register<TMessageHandler>()
-            where TMessageHandler : IMessageHandler
+        public void Register(Type messageHandlerType)
         {
-            var messageHandlerType = typeof(TMessageHandler);
             var messageType = messageHandlerType.GetGenericArguments().First();
 
-            var handler = _serviceProvider.GetService(typeof(TMessageHandler));
+            if (MessageTypeToDelegateType.ContainsKey(messageType))
+                return;
+
+            var handler = _serviceProvider.GetService(messageHandlerType);
 
             var handlerParam = Expression.Constant(handler);
 
@@ -53,13 +68,10 @@
 
             var handleFunc = (Handle<IMessage>)expression.Compile().Invoke;
 
-            _messageTypeToDelegateType.Add(messageType, handleFunc);
+            MessageTypeToDelegateType.Add(messageType, handleFunc);
         }
 
 
-        public Handle<IMessage> HandlerDelegateFor(Type messageType)
-        {
-            return _messageTypeToDelegateType[messageType];
-        }
+        public Handle<IMessage> HandlerDelegateFor(Type messageType) => MessageTypeToDelegateType[messageType];
     }
 }

@@ -1,6 +1,7 @@
 ﻿namespace Infrastructure.Messaging
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -11,7 +12,8 @@
 
     public interface IMessageHandlersRegistry
     {
-        void Register<TMessageHandler>() where TMessageHandler : IMessageHandler;
+        IDictionary<Type, Handle<IMessage>> MessageTypeToDelegateType { get; }
+        void Register(Type messageHandlerType);
         Handle<IMessage> HandlerDelegateFor(Type messageType);
     }
 }
