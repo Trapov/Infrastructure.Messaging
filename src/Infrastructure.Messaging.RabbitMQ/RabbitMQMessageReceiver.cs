@@ -5,12 +5,12 @@
     using global::RabbitMQ.Client.Exceptions;
     using Microsoft.Extensions.Logging;
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
-    using System.Threading.Tasks.Dataflow;
 
     public sealed class RabbitMQMessageReceiver : IMessageReceiver
     {
@@ -18,7 +18,7 @@
         private readonly TaskFactory _taskFactory;
         private readonly ILoggerFactory _loggerFactory;
         private readonly IMessagePacker _messagePacker;
-        private readonly BufferBlock<HandlingProcessFor<IMessage>> _bufferBlock;
+        private readonly BlockingCollection<HandlingProcessFor<IMessage>> _memoryPipe;
 
         public RabbitMQMessageReceiver(
             IConnectionFactory connectionFactory,
@@ -27,7 +27,7 @@
             ILoggerFactory loggerFactory,
             IMessagePacker messagePacker)
         {
-            _bufferBlock = new BufferBlock<HandlingProcessFor<IMessage>>();
+            _memoryPipe = new BlockingCollection<HandlingProcessFor<IMessage>>();
             _connection = new Lazy<IConnection>(() =>
             {
                 var logger = _loggerFactory.CreateLogger<RabbitMQMessageReceiver>();
@@ -62,7 +62,9 @@
 
         public IAsyncEnumerable<HandlingProcessFor<IMessage>> Receive(CancellationToken cancellationToken)
         {
-            return _bufferBlock.AsObservable().ToAsyncEnumerable();
+            return _memoryPipe
+                .GetConsumingEnumerable(cancellationToken)
+                .ToAsyncEnumerable();
         }
 
         private void RegisterAll(IDictionary<Type, Handle<IMessage>> messageTypeToDelegateType)
@@ -104,7 +106,7 @@
                         CancellationToken.None)
                     .GetAwaiter().GetResult();
 
-                    _bufferBlock.Post(new HandlingProcessFor<IMessage>(message, () => model.BasicAck(ea.DeliveryTag, false)));
+                    _memoryPipe.Add(new HandlingProcessFor<IMessage>(message, () => model.BasicAck(ea.DeliveryTag, false)));
                 };
 
                 var result = consumer.BasicConsume(queue: queueName, false, _eventConsumer);
