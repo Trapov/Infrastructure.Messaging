@@ -58,7 +58,7 @@
                     Expression.Assign(messageVariableExact, Expression.Convert(messageParam, messageType)),
                     Expression.Call(
                         handlerParam,
-                        handlerParam.Type.GetMethod("Handle"),
+                        handlerParam.Type.GetMethod("Handle", new[] { messageType, typeof(CancellationToken) }),
                         messageVariableExact,
                         cancellationTokenParam
                     )

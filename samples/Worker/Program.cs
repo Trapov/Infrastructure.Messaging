@@ -21,7 +21,21 @@
         {
             public string Ping { get; set; } = "Ping";
         }
-        public sealed class TestMessageHandler : IMessageHandler<TestMessage>
+
+        public sealed class TestMessageWithEventId : IMessage
+        {
+            public TestMessageWithEventId(string text)
+            {
+                Text = text;
+            }
+
+            public Guid EventId => Guid.NewGuid();
+            public string Text { get; }
+        }
+
+        public sealed class TestMessageHandler : 
+            IMessageHandler<TestMessage>,
+            IMessageHandler<TestMessageWithEventId>
         {
             private readonly ILogger<TestMessageHandler> _logger;
 
@@ -33,7 +47,13 @@
             public Task Handle(TestMessage message, CancellationToken cancellationToken)
             {
                 message.Ping = "Pong";
-                _logger.LogInformation("TestMessage was dispatched. {message}", message);
+                _logger.LogInformation("TestMessage was dispatched. {message}", message.Ping);
+                return Task.CompletedTask;
+            }
+
+            public Task Handle(TestMessageWithEventId message, CancellationToken cancellationToken)
+            {
+                _logger.LogInformation("TestMessageWithEventId was dispatched. {eventId}, {text}", message.EventId, message.Text);
                 return Task.CompletedTask;
             }
         }
@@ -58,7 +78,9 @@
                             mc.UseRabbitMQ(cf => cf.Uri = new Uri(rabbitMQUri));
                             mc.UseJsonPacker(jss => jss.ContractResolver = new CamelCasePropertyNamesContractResolver());
                         }, 
-                        sc => sc.AddSingleton<IMessageHandler<TestMessage>, TestMessageHandler>()
+                        sc => sc
+                            .AddSingleton<IMessageHandler<TestMessage>, TestMessageHandler>()
+                            .AddSingleton<IMessageHandler<TestMessageWithEventId>, TestMessageHandler>()
                     )
                 .BuildServiceProvider();
 
