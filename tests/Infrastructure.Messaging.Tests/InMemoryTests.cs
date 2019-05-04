@@ -9,6 +9,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Xunit;
+    using Infrastructure.Messaging.InMemory.Extensions;
 
     public sealed class InMemoryTests
     {
@@ -32,12 +33,12 @@
 
             services
                 .AddLogging()
-                .AddSingleton<IMessagePacker, JsonMessagePacker>()
-                .AddSingleton<IMessagePublisher, InMemoryMessagePublisher>()
-                .AddSingleton<TaskFactory>()
                 .AddSingleton<BlockingCollection<(Type, object)>, BlockingCollection<(Type, object)>>()
-                .AddIoCRegistryWithHandlers(
-                    (typeof(IMessageHandler<TestMessage>), typeof(TestMessageHandler))
+                .AddMessaging(
+                    mc => mc
+                        .UseJsonPacker(jc => { })
+                        .UseInMemory(),
+                    sc => sc.AddSingleton<IMessageHandler<TestMessage>, TestMessageHandler>()
                 );
 
             var serviceProvider = services.BuildServiceProvider();

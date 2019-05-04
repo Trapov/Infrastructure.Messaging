@@ -57,7 +57,6 @@
                         {
                             mc.UseRabbitMQ(cf => cf.Uri = new Uri(rabbitMQUri));
                             mc.UseJsonPacker(jss => jss.ContractResolver = new CamelCasePropertyNamesContractResolver());
-                            mc.UseIoC();
                         }, 
                         sc => sc.AddSingleton<IMessageHandler<TestMessage>, TestMessageHandler>()
                     )

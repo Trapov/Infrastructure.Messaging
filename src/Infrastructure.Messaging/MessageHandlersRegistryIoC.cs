@@ -71,7 +71,6 @@
             MessageTypeToDelegateType.Add(messageType, handleFunc);
         }
 
-
         public Handle<IMessage> HandlerDelegateFor(Type messageType) => MessageTypeToDelegateType[messageType];
     }
 }

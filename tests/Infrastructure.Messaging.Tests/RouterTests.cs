@@ -47,10 +47,10 @@
 
             _ = services
                 .AddLogging()
-                .AddIoCRegistryWithHandlers(
-                    (typeof(IMessageHandler<TestMessage>), typeof(TestMessageHandler))
+                .AddMessaging(
+                    mc => mc.UseJsonPacker(jc => { }),
+                    sc => sc.AddSingleton<IMessageHandler<TestMessage>, TestMessageHandler>()
                 )
-                .AddSingleton<IMessageRouter, DefaultMessageRouter>()
                 .AddSingleton<IMessageReceiver>(new MockReceiver(messages));
 
             var serviceProvider = services.BuildServiceProvider();

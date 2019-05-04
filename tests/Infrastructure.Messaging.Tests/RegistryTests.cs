@@ -28,8 +28,9 @@ namespace Infrastructure.Messaging.Tests
 
             services
                 .AddLogging()
-                .AddIoCRegistryWithHandlers(
-                    (typeof(IMessageHandler<TestMessage>), typeof(TestMessageHandler))
+                .AddMessaging(
+                    mc => mc.UseJsonPacker(jc => { }),
+                    sc => sc.AddSingleton<IMessageHandler<TestMessage>, TestMessageHandler>()
                 );
 
             var serviceProvider = services.BuildServiceProvider();
@@ -59,8 +60,9 @@ namespace Infrastructure.Messaging.Tests
 
             services
                 .AddLogging()
-                .AddIoCRegistryWithHandlers(
-                    (typeof(IMessageHandler<TestMessage>), typeof(TestMessageHandler))
+                .AddMessaging(
+                    mc => mc.UseJsonPacker(jc => { }),
+                    sc => sc.AddSingleton<IMessageHandler<TestMessage>, TestMessageHandler>()
                 );
 
             var serviceProvider = services.BuildServiceProvider();

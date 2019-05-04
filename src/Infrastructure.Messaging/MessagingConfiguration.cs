@@ -22,11 +22,5 @@
             Services.AddSingleton<IMessagePacker, JsonMessagePacker>();
             return this;
         }
-
-        public MessagingConfiguration UseIoC()
-        {
-            Services.AddSingleton<IMessageHandlersRegistry, MessageHandlersRegistryIoC>();
-            return this;
-        }
     }
 }

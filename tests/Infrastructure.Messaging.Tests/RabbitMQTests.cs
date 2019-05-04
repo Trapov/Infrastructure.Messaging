@@ -1,14 +1,12 @@
 ﻿namespace Infrastructure.Messaging.Tests
 {
-    using Infrastructure.Messaging.RabbitMQ;
     using Infrastructure.Messaging.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection;
-    using global::RabbitMQ.Client;
+    using Infrastructure.Messaging.RabbitMQ.Extensions;
     using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Xunit;
-    using System.Linq;
 
     public sealed class RabbitMQTests
     {
@@ -30,16 +28,13 @@
         {
             var services = new ServiceCollection();
 
-            var connectionFactory = new ConnectionFactory { Uri = new Uri("####") };
-
             services
                 .AddLogging()
-                .AddSingleton<IConnectionFactory>(connectionFactory)
-                .AddSingleton<IMessagePacker, JsonMessagePacker>()
-                .AddSingleton<IMessagePublisher, RabbitMQMessagePublisher>()
-                .AddSingleton<TaskFactory>()
-                .AddIoCRegistryWithHandlers(
-                    (typeof(IMessageHandler<TestMessage>), typeof(TestMessageHandler))
+                .AddMessaging(
+                    mc => mc
+                        .UseJsonPacker(jc => { })
+                        .UseRabbitMQ(cfb => cfb.Uri = new Uri("####")),
+                    sc => sc.AddSingleton<IMessageHandler<TestMessage>, TestMessageHandler>()
                 );
 
             var serviceProvider = services.BuildServiceProvider();
@@ -56,18 +51,13 @@
         {
             var services = new ServiceCollection();
 
-            var connectionFactory = new ConnectionFactory { Uri = new Uri("###") };
-
             services
                 .AddLogging()
-                .AddSingleton<IConnectionFactory>(connectionFactory)
-                .AddSingleton<IMessagePacker, JsonMessagePacker>()
-                .AddSingleton<IMessagePublisher, RabbitMQMessagePublisher>()
-                .AddSingleton<IMessageRouter, DefaultMessageRouter>()
-                .AddSingleton<IMessageReceiver, RabbitMQMessageReceiver>()
-                .AddSingleton<TaskFactory>()
-                .AddIoCRegistryWithHandlers(
-                    (typeof(IMessageHandler<TestMessage>), typeof(TestMessageHandler))
+                .AddMessaging(
+                    mc => mc
+                        .UseJsonPacker(jss => { })
+                        .UseRabbitMQ(cfb => cfb.Uri = new Uri("###")),
+                    sc => sc.AddSingleton<IMessageHandler<TestMessage>, TestMessageHandler>()
                 );
 
             var serviceProvider = services.BuildServiceProvider();
