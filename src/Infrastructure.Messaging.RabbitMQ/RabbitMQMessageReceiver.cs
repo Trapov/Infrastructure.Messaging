@@ -106,11 +106,17 @@
                         CancellationToken.None)
                     .GetAwaiter().GetResult();
 
-                    _memoryPipe.Add(new HandlingProcessFor<IMessage>(message, () => model.BasicAck(ea.DeliveryTag, false)));
+                    _memoryPipe.Add(new HandlingProcessFor<IMessage>(message, () => model.BasicAck(ea.DeliveryTag, false), (ex) => OnError(ex, model, ea)));
                 };
 
                 var result = consumer.BasicConsume(queue: queueName, false, _eventConsumer);
             }
+        }
+
+        private void OnError(Exception ex, IModel model, BasicDeliverEventArgs ea)
+        {
+            _loggerFactory.CreateLogger<RabbitMQMessageReceiver>().LogCritical(ex, "An error occured.");
+            model.BasicNack(ea.DeliveryTag, false, false);
         }
     }
 }

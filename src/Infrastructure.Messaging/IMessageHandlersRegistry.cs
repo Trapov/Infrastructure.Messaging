@@ -14,6 +14,5 @@
     {
         IDictionary<Type, Handle<IMessage>> MessageTypeToDelegateType { get; }
         void Register(Type messageHandlerType);
-        Handle<IMessage> HandlerDelegateFor(Type messageType);
     }
 }

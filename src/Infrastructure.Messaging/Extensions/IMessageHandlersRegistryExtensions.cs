@@ -9,5 +9,9 @@
         {
             messageHandlersRegistry.Register(typeof(TMessageHandler));
         }
+
+        public static Handle<IMessage> HandlerDelegateFor(
+            this IMessageHandlersRegistry messageHandlersRegistry, 
+            Type messageType) => messageHandlersRegistry.MessageTypeToDelegateType[messageType];
     }
 }

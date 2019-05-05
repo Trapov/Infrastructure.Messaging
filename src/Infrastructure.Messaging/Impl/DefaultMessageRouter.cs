@@ -1,5 +1,7 @@
 ﻿namespace Infrastructure.Messaging
 {
+    using Infrastructure.Messaging.Extensions;
+    using System;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -23,8 +25,26 @@
                 var messageType = handlingProcess.Message.GetType();
                 var handlerDelegate = _messageHandlersRegistry.HandlerDelegateFor(messageType);
 
-                handlerDelegate(handlingProcess.Message, cancellationToken)
-                    .ContinueWith(t => handlingProcess.ToHandled(), cancellationToken);
+                try
+                {
+                    var handlerTask = handlerDelegate(handlingProcess.Message, cancellationToken);
+
+                    handlerTask
+                        .ContinueWith(t =>handlingProcess.ToError(t.Exception),
+                        cancellationToken,
+                        TaskContinuationOptions.OnlyOnFaulted,
+                        TaskScheduler.Current);
+                    
+                    handlerTask
+                        .ContinueWith(t => handlingProcess.ToHandled(),
+                        cancellationToken,
+                        TaskContinuationOptions.OnlyOnRanToCompletion,
+                        TaskScheduler.Current);
+                }
+                catch(Exception ex)
+                {
+                    handlingProcess.ToError(ex);
+                }
             }
         }
     }

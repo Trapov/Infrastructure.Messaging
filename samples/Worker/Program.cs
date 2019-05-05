@@ -44,11 +44,11 @@
                 _logger = logger;
             }
 
-            public Task Handle(TestMessage message, CancellationToken cancellationToken)
+            public async Task Handle(TestMessage message, CancellationToken cancellationToken)
             {
-                message.Ping = "Pong";
-                _logger.LogInformation("TestMessage was dispatched. {message}", message.Ping);
-                return Task.CompletedTask;
+                await Task.Delay(100);
+                //_logger.LogInformation("Test message was dispached {message}", message.Ping);
+                throw new Exception("AASDSD");
             }
 
             public Task Handle(TestMessageWithEventId message, CancellationToken cancellationToken)

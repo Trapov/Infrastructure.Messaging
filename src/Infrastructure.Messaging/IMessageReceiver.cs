@@ -11,13 +11,16 @@
 
     public sealed class HandlingProcessFor<TMessage>
     {
-        public HandlingProcessFor(IMessage message, Action toHandled)
+        public HandlingProcessFor(IMessage message, Action toHandled, Action<Exception> toError)
         {
             Message = message;
             ToHandled = toHandled;
+            ToError = toError;
         }
 
         public IMessage Message { get; }
         public Action ToHandled { get; }
+
+        public Action<Exception> ToError { get; }
     }
 }
