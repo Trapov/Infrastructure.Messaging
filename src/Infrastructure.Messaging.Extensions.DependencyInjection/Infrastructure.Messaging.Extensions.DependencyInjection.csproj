@@ -2,6 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+
+    <PackageId>Common.Infrastructure.Messaging.Extensions.DependencyInjection</PackageId>
+    <PackageProjectUrl>https://github.com/Trapov/Infrastructure.Messaging</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Trapov/Infrastructure.Messaging</RepositoryUrl>
+    <Version>0.1.0</Version>
+    <Authors>dmitriy afonin</Authors>
+    <Company> __ </Company>
+
   </PropertyGroup>
 
   <ItemGroup>

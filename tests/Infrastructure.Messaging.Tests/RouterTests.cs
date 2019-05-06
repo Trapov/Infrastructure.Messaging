@@ -34,7 +34,7 @@
 
             IAsyncEnumerable<HandlingProcessFor<IMessage>> IMessageReceiver.Receive(CancellationToken cancellationToken)
             {
-                return AsyncEnumerable.Range(0, 1).Select(d => new HandlingProcessFor<IMessage>(new TestMessage(), () => { }));
+                return AsyncEnumerable.Range(0, 1).Select(d => new HandlingProcessFor<IMessage>(new TestMessage(), () => { }, (ex) => {}));
             }
         }
 

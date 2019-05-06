@@ -4,6 +4,7 @@ namespace Infrastructure.Messaging.Tests
     using System.Threading.Tasks;
     using Microsoft.Extensions.DependencyInjection;
     using Infrastructure.Messaging.Extensions.DependencyInjection;
+    using Infrastructure.Messaging.Extensions;
     using Xunit;
 
     public sealed class RegistryTests
