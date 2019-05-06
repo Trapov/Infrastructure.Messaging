@@ -5,6 +5,7 @@
     using Microsoft.Extensions.Logging;
     using System;
     using System.Linq;
+    using System.Reflection;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
@@ -38,7 +39,7 @@
                     Interlocked.Increment(ref tryCount);
                     try
                     {
-                        var connection = connectionFactory.CreateConnection();
+                        var connection = connectionFactory.CreateConnection(Assembly.GetEntryAssembly().FullName);
                         logger.LogInformation("Connection is succesfull => {connection}", connection);
                         return connection;
                     }

@@ -1,0 +1,55 @@
+warning: LF will be replaced by CRLF in samples/Worker/appsettings.json.
+The file will have its original line endings in your working directory.
+[1mdiff --git a/samples/Worker/appsettings.json b/samples/Worker/appsettings.json[m
+[1mindex b7e4764..e55f45f 100644[m
+[1m--- a/samples/Worker/appsettings.json[m
+[1m+++ b/samples/Worker/appsettings.json[m
+[36m@@ -1,5 +1,5 @@[m
+ ﻿{[m
+   "RabbitMq": {[m
+[31m-    "uri": "###"[m
+[32m+[m[32m    "uri": "amqp://qvsloobe:ZUEvexDUsupPa-GexMvknbQZhAh1foOq@bulldog.rmq.cloudamqp.com/qvsloobe"[m
+   }[m
+ }[m
+[1mdiff --git a/src/Infrastructure.Messaging.RabbitMQ/RabbitMQMessagePublisher.cs b/src/Infrastructure.Messaging.RabbitMQ/RabbitMQMessagePublisher.cs[m
+[1mindex 9ae6046..cd06df9 100644[m
+[1m--- a/src/Infrastructure.Messaging.RabbitMQ/RabbitMQMessagePublisher.cs[m
+[1m+++ b/src/Infrastructure.Messaging.RabbitMQ/RabbitMQMessagePublisher.cs[m
+[36m@@ -5,6 +5,7 @@[m
+     using Microsoft.Extensions.Logging;[m
+     using System;[m
+     using System.Linq;[m
+[32m+[m[32m    using System.Reflection;[m
+     using System.Text;[m
+     using System.Threading;[m
+     using System.Threading.Tasks;[m
+[36m@@ -38,7 +39,7 @@[m
+                     Interlocked.Increment(ref tryCount);[m
+                     try[m
+                     {[m
+[31m-                        var connection = connectionFactory.CreateConnection();[m
+[32m+[m[32m                        var connection = connectionFactory.CreateConnection(Assembly.GetEntryAssembly().FullName);[m
+                         logger.LogInformation("Connection is succesfull => {connection}", connection);[m
+                         return connection;[m
+                     }[m
+[1mdiff --git a/src/Infrastructure.Messaging.RabbitMQ/RabbitMQMessageReceiver.cs b/src/Infrastructure.Messaging.RabbitMQ/RabbitMQMessageReceiver.cs[m
+[1mindex 75b5a7b..c281902 100644[m
+[1m--- a/src/Infrastructure.Messaging.RabbitMQ/RabbitMQMessageReceiver.cs[m
+[1m+++ b/src/Infrastructure.Messaging.RabbitMQ/RabbitMQMessageReceiver.cs[m
+[36m@@ -8,6 +8,7 @@[m
+     using System.Collections.Concurrent;[m
+     using System.Collections.Generic;[m
+     using System.Linq;[m
+[32m+[m[32m    using System.Reflection;[m
+     using System.Text;[m
+     using System.Threading;[m
+     using System.Threading.Tasks;[m
+[36m@@ -40,7 +41,7 @@[m
+                     Interlocked.Increment(ref tryCount);[m
+                     try[m
+                     {[m
+[31m-                        var connection = connectionFactory.CreateConnection();[m
+[32m+[m[32m                        var connection = connectionFactory.CreateConnection(Assembly.GetEntryAssembly().FullName);[m
+                         logger.LogInformation("Connection is succesfull => {connection}", connection);[m
+                         return connection;[m
+                     }[m
