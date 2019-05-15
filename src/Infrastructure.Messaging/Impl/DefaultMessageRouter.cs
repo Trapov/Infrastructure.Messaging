@@ -30,16 +30,20 @@
                     var handlerTask = handlerDelegate(handlingProcess.Message, cancellationToken);
 
                     handlerTask
-                        .ContinueWith(t =>handlingProcess.ToError(t.Exception),
-                        cancellationToken,
-                        TaskContinuationOptions.OnlyOnFaulted,
-                        TaskScheduler.Current);
+                        .ContinueWith(
+                            t => handlingProcess.ToError(t.Exception),
+                            cancellationToken,
+                            TaskContinuationOptions.OnlyOnFaulted,
+                            TaskScheduler.Current
+                        );
                     
                     handlerTask
-                        .ContinueWith(t => handlingProcess.ToHandled(),
-                        cancellationToken,
-                        TaskContinuationOptions.OnlyOnRanToCompletion,
-                        TaskScheduler.Current);
+                        .ContinueWith(
+                            t => handlingProcess.ToHandled(),
+                            cancellationToken,
+                            TaskContinuationOptions.OnlyOnRanToCompletion,
+                            TaskScheduler.Current
+                        );
                 }
                 catch(Exception ex)
                 {
