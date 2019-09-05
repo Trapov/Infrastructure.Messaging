@@ -14,7 +14,7 @@
         private readonly ILogger<MessageHandlersRegistryIoC> _logger;
         private readonly IServiceProvider _serviceProvider;
 
-        public IDictionary<Type, Handle<IMessage>> MessageTypeToDelegateType { get; }
+        public IDictionary<Type, (Handle<IMessage>, Type)> MessageTypeToDelegateType { get; }
 
         public MessageHandlersRegistryIoC(
             ILoggerFactory loggerFactory,
@@ -23,7 +23,7 @@
         {
             _logger = loggerFactory.CreateLogger<MessageHandlersRegistryIoC>();
             _serviceProvider = serviceProvider;
-            MessageTypeToDelegateType = new Dictionary<Type, Handle<IMessage>>();
+            MessageTypeToDelegateType = new Dictionary<Type, (Handle<IMessage>, Type)>();
 
             var handlers = serviceCollection
                 .Where(sd =>
@@ -44,31 +44,36 @@
             if (MessageTypeToDelegateType.ContainsKey(messageType))
                 return;
 
-            var handler = _serviceProvider.GetService(messageHandlerType);
+            //var handler = _serviceProvider.GetService(messageHandlerType);
 
-            var handlerParam = Expression.Constant(handler);
-
+            var handlerParam = Expression.Parameter(typeof(IMessageHandler), "handler");
             var messageParam = Expression.Parameter(typeof(IMessage), "message");
-            var messageVariableExact = Expression.Variable(messageType, "messageExact");
+
             var cancellationTokenParam = Expression.Parameter(typeof(CancellationToken), "cancellationToken");
 
-            var expression = Expression.Lambda<Func<IMessage, CancellationToken, Task>>(
-                Expression.Block(
-                    new[] { messageVariableExact },
+            var messageVariableExact = Expression.Variable(messageType, "messageExact");
+            var handlerVariableExact = Expression.Variable(messageHandlerType, "handlerExact");
+
+            var block = Expression.Block(
+                    new[] { messageVariableExact, handlerVariableExact },
+                    Expression.Assign(handlerVariableExact, Expression.Convert(handlerParam, messageHandlerType)),
                     Expression.Assign(messageVariableExact, Expression.Convert(messageParam, messageType)),
                     Expression.Call(
-                        handlerParam,
-                        handlerParam.Type.GetMethod("Handle", new[] { messageType, typeof(CancellationToken) }),
+                        handlerVariableExact,
+                        handlerVariableExact.Type.GetMethod("Handle", new[] { messageType, typeof(CancellationToken) }),
                         messageVariableExact,
                         cancellationTokenParam
                     )
-                ),
+                );
+
+            var expression = Expression.Lambda<Func<IMessage, IMessageHandler, CancellationToken, Task>>(
+                block,
                 messageParam,
+                handlerParam,
                 cancellationTokenParam);
 
             var handleFunc = (Handle<IMessage>)expression.Compile().Invoke;
-
-            MessageTypeToDelegateType.Add(messageType, handleFunc);
+            MessageTypeToDelegateType.Add(messageType, (handleFunc, messageHandlerType));
         }
     }
 }

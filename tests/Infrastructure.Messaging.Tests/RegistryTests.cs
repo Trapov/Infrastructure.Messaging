@@ -40,7 +40,7 @@ namespace Infrastructure.Messaging.Tests
             Assert.NotNull(registry);
             Assert.IsType<MessageHandlersRegistryIoC>(registry);
 
-            var handler = registry.HandlerDelegateFor(typeof(TestMessage));
+            var (handler, handlerType) = registry.HandlerDelegateFor(typeof(TestMessage));
 
             Assert.NotNull(handler);
             Assert.IsType<Handle<IMessage>>(handler);
@@ -49,7 +49,7 @@ namespace Infrastructure.Messaging.Tests
 
             Assert.Equal("Ping", message.Ping);
 
-            handler(message, CancellationToken.None).GetAwaiter().GetResult();
+            handler(message, serviceProvider.GetService<TestMessageHandler>(), CancellationToken.None).GetAwaiter().GetResult();
 
             Assert.Equal("Pong", message.Ping);
         }
@@ -68,12 +68,13 @@ namespace Infrastructure.Messaging.Tests
 
             var serviceProvider = services.BuildServiceProvider();
 
+
             var registry = serviceProvider.GetRequiredService<IMessageHandlersRegistry>();
 
             Assert.NotNull(registry);
             Assert.IsType<MessageHandlersRegistryIoC>(registry);
 
-            var handler = registry.HandlerDelegateFor(typeof(TestMessage));
+            var (handler, handlerType) = registry.HandlerDelegateFor(typeof(TestMessage));
 
             Assert.NotNull(handler);
             Assert.IsType<Handle<IMessage>>(handler);
@@ -82,7 +83,7 @@ namespace Infrastructure.Messaging.Tests
 
             Assert.Equal("Ping", message.Ping);
 
-            handler(message, CancellationToken.None).GetAwaiter().GetResult();
+            handler(message, serviceProvider.GetService<IMessageHandler<TestMessage>>(), CancellationToken.None).GetAwaiter().GetResult();
 
             Assert.Equal("Pong", message.Ping);
         }

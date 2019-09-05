@@ -68,7 +68,7 @@
                 .ToAsyncEnumerable();
         }
 
-        private void RegisterAll(IDictionary<Type, Handle<IMessage>> messageTypeToDelegateType)
+        private void RegisterAll(IDictionary<Type, (Handle<IMessage>, Type)> messageTypeToDelegateType)
         {
             foreach (var messageType in messageTypeToDelegateType.Keys)
             {

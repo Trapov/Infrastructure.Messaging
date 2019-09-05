@@ -1,0 +1,43 @@
+dist: xenial
+addons:
+  snaps:
+  - name: dotnet-sdk
+    classic: true
+    channel: latest/beta
+sudo: required
+language: csharp
+mono: none
+jobs:
+  include:
+  - if: tag IS present
+  - stage: dotnet-build-messaging
+    script:
+    - sudo snap alias dotnet-sdk.dotnet dotnet
+    - dotnet build -c Release
+    - cd src/Common.Infrastructure.Messaging && dotnet pack /p:PackageVersion=0.2.$TRAVIS_BUILD_NUMBER -c Release && cd bin/Release && dotnet nuget push Common.Infrastructure.Messaging.0.2.$TRAVIS_BUILD_NUMBER.nupkg -k $NUGET_API_KEY -s https://api.nuget.org/v3/index.json
+    on
+      tags: true
+
+  - stage: dotnet-build-rabbit-mq
+    script:
+    - sudo snap alias dotnet-sdk.dotnet dotnet
+    - dotnet build -c Release
+    - cd src/Common.Infrastructure.Messaging.RabbitMQ && dotnet pack /p:PackageVersion=0.2.$TRAVIS_BUILD_NUMBER -c Release && cd bin/Release && dotnet nuget push Common.Infrastructure.Messaging.RabbitMQ.0.2.$TRAVIS_BUILD_NUMBER.nupkg -k $NUGET_API_KEY -s https://api.nuget.org/v3/index.json
+    on
+      tags: true
+
+  - stage: dotnet-build-in-memory
+    script:
+    - sudo snap alias dotnet-sdk.dotnet dotnet
+    - dotnet build -c Release
+    - cd src/Common.Infrastructure.Messaging.InMemory && dotnet pack /p:PackageVersion=0.1.$TRAVIS_BUILD_NUMBER -c Release && cd bin/Release && dotnet nuget push Common.Infrastructure.Messaging.InMemory.0.1.$TRAVIS_BUILD_NUMBER.nupkg -k $NUGET_API_KEY -s https://api.nuget.org/v3/index.json
+    on
+      tags: true
+
+  - stage: dotnet-build-dependency-injection
+    script:
+    - sudo snap alias dotnet-sdk.dotnet dotnet
+    - dotnet build -c Release
+    - cd src/Common.Infrastructure.Messaging.Extensions.DependencyInjection && dotnet pack /p:PackageVersion=0.1.$TRAVIS_BUILD_NUMBER -c Release && cd bin/Release && dotnet nuget push Common.Infrastructure.Messaging.Extensions.DependencyInjection.0.1.$TRAVIS_BUILD_NUMBER.nupkg -k $NUGET_API_KEY -s https://api.nuget.org/v3/index.json
+    on
+      tags: true
