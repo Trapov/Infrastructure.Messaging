@@ -1,15 +1,14 @@
 ﻿namespace Infrastructure.Messaging.Tests
 {
-    using Infrastructure.Messaging.InMemory;
     using Infrastructure.Messaging.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection;
-    using Newtonsoft.Json;
     using System;
     using System.Collections.Concurrent;
     using System.Threading;
     using System.Threading.Tasks;
     using Xunit;
     using Infrastructure.Messaging.InMemory.Extensions;
+    using System.Text.Json;
 
     public sealed class InMemoryTests
     {
@@ -36,7 +35,7 @@
                 .AddSingleton<BlockingCollection<(Type, object)>, BlockingCollection<(Type, object)>>()
                 .AddMessaging(
                     mc => mc
-                        .UseJsonPacker(jc => { })
+                        .UseJsonPacker(jso => jso.PropertyNamingPolicy = JsonNamingPolicy.CamelCase)
                         .UseInMemory(),
                     sc => sc.AddSingleton<IMessageHandler<TestMessage>, TestMessageHandler>()
                 );
@@ -51,7 +50,9 @@
 
             var blockingCollection = serviceProvider.GetRequiredService<BlockingCollection<(Type, object)>>();
 
-            var message = JsonConvert.DeserializeObject<TestMessage>((string)blockingCollection.Take().Item2);
+            var packedMessage = blockingCollection.Take().Item2;
+
+            var message = JsonSerializer.Deserialize<TestMessage>((string)packedMessage);
 
             Assert.IsType<TestMessage>(message);
         }

@@ -1,7 +1,7 @@
 ﻿namespace Infrastructure.Messaging
 {
     using Microsoft.Extensions.DependencyInjection;
-    using Newtonsoft.Json;
+    using System.Text.Json;
     using System;
 
     public sealed class MessagingConfiguration
@@ -14,11 +14,11 @@
         public IServiceCollection Services { get; }
 
         public MessagingConfiguration UseJsonPacker(
-            Action<JsonSerializerSettings> jsonConfigurations)
+            Action<JsonSerializerOptions> jsonConfigurations)
         {
-            var settings = new JsonSerializerSettings();
+            var settings = new JsonSerializerOptions();
             jsonConfigurations(settings);
-            JsonConvert.DefaultSettings = () => settings;
+            Services.AddSingleton(settings);
             Services.AddSingleton<IMessagePacker, JsonMessagePacker>();
             return this;
         }

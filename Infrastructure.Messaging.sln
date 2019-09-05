@@ -19,7 +19,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure.Messaging.Ex
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{05F38609-D617-4FCC-92F2-404E48CDCF58}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Worker", "samples\Worker\Worker.csproj", "{3BCCCE18-F12B-4960-AE4F-586DE48E1A31}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Worker", "samples\Worker\Worker.csproj", "{3BCCCE18-F12B-4960-AE4F-586DE48E1A31}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8808761A-6B73-40EE-9B7D-CC0620227FFC}"
+	ProjectSection(SolutionItems) = preProject
+		.travis.yml = .travis.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

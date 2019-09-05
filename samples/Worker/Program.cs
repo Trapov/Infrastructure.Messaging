@@ -6,12 +6,12 @@
     using Infrastructure.Messaging.RabbitMQ.Extensions;
     using System;
     using System.IO;
-    using Newtonsoft.Json.Serialization;
     using System.Runtime.Loader;
     using System.Threading;
     using Microsoft.Extensions.Logging;
     using Infrastructure.Messaging;
     using System.Threading.Tasks;
+    using System.Text.Json;
 
     public static class Program
     {
@@ -46,7 +46,7 @@
 
             public async Task Handle(TestMessage message, CancellationToken cancellationToken)
             {
-                await Task.Delay(100);
+                await Task.Delay(TimeSpan.FromSeconds(10));
                 //_logger.LogInformation("Test message was dispached {message}", message.Ping);
                 throw new Exception("AASDSD");
             }
@@ -70,13 +70,13 @@
 
             var rabbitMQUri = configuration.GetSection("RabbitMq")["uri"];
 
-            var serviceProvider = 
+            var serviceProvider =
                 new ServiceCollection()
-                    .AddLogging(lb => lb.AddConsole())
+                    .AddLogging(lb => lb.AddConsole().SetMinimumLevel(LogLevel.Trace))
                     .AddMessaging(mc =>
                         {
                             mc.UseRabbitMQ(cf => cf.Uri = new Uri(rabbitMQUri));
-                            mc.UseJsonPacker(jss => jss.ContractResolver = new CamelCasePropertyNamesContractResolver());
+                            mc.UseJsonPacker(jso => jso.PropertyNamingPolicy = JsonNamingPolicy.CamelCase);
                         }, 
                         sc => sc
                             .AddSingleton<IMessageHandler<TestMessage>, TestMessageHandler>()
