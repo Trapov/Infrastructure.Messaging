@@ -49,7 +49,7 @@ namespace Infrastructure.Messaging.Tests
 
             Assert.Equal("Ping", message.Ping);
 
-            handler(message, serviceProvider.GetService<TestMessageHandler>(), CancellationToken.None).GetAwaiter().GetResult();
+            handler(message, serviceProvider.GetService<IMessageHandler<TestMessage>>(), CancellationToken.None).GetAwaiter().GetResult();
 
             Assert.Equal("Pong", message.Ping);
         }
