@@ -5,6 +5,9 @@ addons:
       channel: latest/beta
       classic: true
       name: dotnet-sdk
+branches: 
+  only: 
+    - master
 dist: xenial
 jobs: 
   include: 
