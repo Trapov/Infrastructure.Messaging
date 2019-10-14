@@ -52,8 +52,12 @@
 
             await foreach (var handlingProcess in _messageReceiver.Receive(cancellationToken))
             {
-                var stopWatch = new Stopwatch();
-                stopWatch.Start();
+                Stopwatch stopWatch = null;
+                _logger.IsEnabled(LogLevel.Trace);
+                {
+                    stopWatch = new Stopwatch();
+                    stopWatch.Start();
+                }
 
                 var messageType = handlingProcess.Message.GetType();
                 var (handlerDelegate, handlerType) = _messageHandlersRegistry.HandlerDelegateFor(messageType);
@@ -79,13 +83,14 @@
                     while (!_runningTasks.TryRemove(task.Id, out removedTask))
                         _spinForRemove.SpinOnce();
 
-                    stopWatch.Stop();
-
-                    _logger.LogTrace(
-                         message: LogMessageRemovedTemplate,
-                         removedTask.Name, removedTask.Task.Id, stopWatch.ElapsedMilliseconds
-                     );
-
+                    _logger.IsEnabled(LogLevel.Trace);
+                    {
+                        stopWatch.Stop();
+                        _logger.LogTrace(
+                             message: LogMessageRemovedTemplate,
+                             removedTask.Name, removedTask.Task.Id, stopWatch.ElapsedMilliseconds
+                         );
+                    }
                 }, continueTask: out _, cancellationToken: cancellationToken);
 
                 // Busy-waiting
