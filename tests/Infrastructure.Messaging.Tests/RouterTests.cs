@@ -32,9 +32,10 @@
                 _messages = messages;
             }
 
-            IAsyncEnumerable<HandlingProcessFor<IMessage>> IMessageReceiver.Receive(CancellationToken cancellationToken)
+            async IAsyncEnumerable<HandlingProcessFor<IMessage>> IMessageReceiver.Receive(CancellationToken cancellationToken)
             {
-                return AsyncEnumerable.Range(0, 1).Select(d => new HandlingProcessFor<IMessage>(new TestMessage(), () => { }, (ex) => {}));
+                await Task.Yield();
+                yield return new HandlingProcessFor<IMessage>(new TestMessage(), () => { }, (ex) => {});
             }
         }
 

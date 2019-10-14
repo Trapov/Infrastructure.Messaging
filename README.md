@@ -10,8 +10,6 @@ Library for messaging between services.
 # Requirements
 - Microsoft.Extensions.DependencyInjection (>= 2.2.0)
 - Microsoft.Extensions.Logging.Abstractions (>= 2.2.0)
-- Newtonsoft.Json (>= 12.0.2)
-- System.Interactive.Async (>= 4.0.0-preview.8.build.9)
 
 # Installation
 
@@ -38,7 +36,7 @@ var serviceProvider =
         .AddMessaging(mc =>
             {
                 mc.UseRabbitMQ(cf => cf.Uri = new Uri(rabbitMQUri));
-                mc.UseJsonPacker(jss => jss.ContractResolver = new CamelCasePropertyNamesContractResolver());
+                mc.UseJsonPacker(jso => jso.PropertyNamingPolicy = JsonNamingPolicy.CamelCase);
             }, 
             sc => sc
                 .AddSingleton<IMessageHandler<TestMessage>, TestMessageHandler>()

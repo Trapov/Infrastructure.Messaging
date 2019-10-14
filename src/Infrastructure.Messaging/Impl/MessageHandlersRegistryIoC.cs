@@ -44,8 +44,6 @@
             if (MessageTypeToDelegateType.ContainsKey(messageType))
                 return;
 
-            //var handler = _serviceProvider.GetService(messageHandlerType);
-
             var handlerParam = Expression.Parameter(typeof(IMessageHandler), "handler");
             var messageParam = Expression.Parameter(typeof(IMessage), "message");
 

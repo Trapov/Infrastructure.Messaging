@@ -16,21 +16,14 @@
             _options = options;
         }
 
-        public async Task<object> Pack(IMessage message, CancellationToken cancellationToken)
+        public ValueTask<object> Pack(IMessage message, CancellationToken cancellationToken)
         {
-            using var stream = new MemoryStream();
-            //await JsonSerializer.SerializeAsync(stream, message, message.GetType(), _options, cancellationToken);
-            //await stream.FlushAsync(cancellationToken);
-            //using var streamReader = new StreamReader(stream);
-
-            //var result = await streamReader.ReadToEndAsync();
-            using var writer = new Utf8JsonWriter(stream);
-            var result = JsonSerializer.Serialize(message, _options);
-            writer.Flush();
-            return result;
+            return new ValueTask<object>(
+                JsonSerializer.Serialize(message, inputType: message.GetType(), options: _options)
+            );
         }
 
-        public async Task<IMessage> Unpack(object messageObj, Type typeToUnpack, CancellationToken cancellationToken)
+        public async ValueTask<IMessage> Unpack(object messageObj, Type typeToUnpack, CancellationToken cancellationToken)
         {
             using var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes((string)messageObj));
 
