@@ -124,8 +124,10 @@
                 stringBuilder = 
                     stringBuilder
                         .Clear()
-                    .AppendFormat("Router is [{0}]" + Environment.NewLine +
-                            "Running tasks => {1}" + Environment.NewLine + "------------------------------------",
+                    .AppendFormat("Thread count [{0}]" + Environment.NewLine +
+                            "Router is [{1}]" + Environment.NewLine +
+                            "Running tasks => {2}" + Environment.NewLine + "------------------------------------",
+                            ThreadPool.ThreadCount,
                             MessageRouter.IsRunning,
                             MessageRouter.RunningTasks.Count()
                         );

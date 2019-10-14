@@ -6,6 +6,7 @@
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -13,9 +14,8 @@
     public sealed class DefaultMessageRouter : IMessageRouter
     {
         private const string LogMessageHandlingTemplate = "Thread [{ManagedThreadId}] is trying to dispatch a message [{MessageType}] to [{Handler}]";
-        private const string LogMessageRemovedTemplate = "[{MessageType}]:[{TaskId}] was handled";
+        private const string LogMessageRemovedTemplate = "[{MessageType}]:[{TaskId}] was handled for {ElapsedMilliseconds}ms";
         private const string LogMessageAddedForHandling = "Thread [{ManagedThreadId}] has placed [{MessageType}]:[{TaskId}] for dispatching";
-
 
         private readonly IMessageReceiver _messageReceiver;
         private readonly IMessageHandlersRegistry _messageHandlersRegistry;
@@ -25,9 +25,7 @@
         private readonly SpinWait _spinForAdd = new SpinWait();
         private readonly SpinWait _spinForRemove = new SpinWait();
 
-
         public bool IsRunning { get; private set; }
-        
         // Will do a snapshot so we're fine. 
         public IEnumerable<RunningTask> RunningTasks => _runningTasks.Select(t => t.Value);
 
@@ -54,12 +52,15 @@
 
             await foreach (var handlingProcess in _messageReceiver.Receive(cancellationToken))
             {
+                var stopWatch = new Stopwatch();
+                stopWatch.Start();
+
                 var messageType = handlingProcess.Message.GetType();
                 var (handlerDelegate, handlerType) = _messageHandlersRegistry.HandlerDelegateFor(messageType);
 
                 using var scope = _serviceProvider.CreateScope();
                 var handler = (IMessageHandler)scope.ServiceProvider.GetService(handlerType);
-                
+
                 _logger.LogTrace(
                     message: LogMessageHandlingTemplate, 
                     Thread.CurrentThread.ManagedThreadId, messageType, handlerType
@@ -78,8 +79,11 @@
                     while (!_runningTasks.TryRemove(task.Id, out removedTask))
                         _spinForRemove.SpinOnce();
 
+                    stopWatch.Stop();
+
                     _logger.LogTrace(
-                         message: LogMessageRemovedTemplate, removedTask.Name, removedTask.Task.Id
+                         message: LogMessageRemovedTemplate,
+                         removedTask.Name, removedTask.Task.Id, stopWatch.ElapsedMilliseconds
                      );
 
                 }, continueTask: out _, cancellationToken: cancellationToken);
