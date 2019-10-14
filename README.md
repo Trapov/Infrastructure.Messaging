@@ -8,12 +8,12 @@ Library for messaging between services.
 |Infrastructure.Messaging|[![Build Status](https://travis-ci.com/Trapov/Infrastructure.Messaging.svg?branch=master)](https://travis-ci.com/Trapov/Infrastructure.Messaging)|
 
 # Requirements
--- .NETStandard 2.1
+- .NETStandard 2.1
 
--- Microsoft.Extensions.DependencyInjection (>= 3.0.0)
--- Microsoft.Extensions.DependencyInjection.Abstractions (>= 3.0.0)
--- Microsoft.Extensions.Logging.Abstractions (>= 3.0.0)
--- System.Text.Json (>= 4.6.0)
+- Microsoft.Extensions.DependencyInjection (>= 3.0.0)
+- Microsoft.Extensions.DependencyInjection.Abstractions (>= 3.0.0)
+- Microsoft.Extensions.Logging.Abstractions (>= 3.0.0)
+- System.Text.Json (>= 4.6.0)
 
 # Demo
 
