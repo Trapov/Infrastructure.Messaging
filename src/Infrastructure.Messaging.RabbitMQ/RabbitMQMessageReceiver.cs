@@ -42,7 +42,7 @@
                     try
                     {
                         var connection = connectionFactory.CreateConnection(Assembly.GetEntryAssembly().FullName);
-                        logger.LogInformation("Connection is succesfull => {connection}", connection);
+                        logger.LogTrace("Connection is succesfull => {connection}", connection);
                         return connection;
                     }
                     catch (BrokerUnreachableException e)
@@ -61,11 +61,13 @@
             RegisterAll(messageHandlersRegistry.MessageTypeToDelegateType);
         }
 
-        public IAsyncEnumerable<HandlingProcessFor<IMessage>> Receive(CancellationToken cancellationToken)
+        public async IAsyncEnumerable<HandlingProcessFor<IMessage>> Receive(CancellationToken cancellationToken)
         {
-            return _memoryPipe
-                .GetConsumingEnumerable(cancellationToken)
-                .ToAsyncEnumerable();
+            await Task.Yield();
+            foreach (var message in _memoryPipe.GetConsumingEnumerable(cancellationToken))
+            {
+                yield return message;
+            }
         }
 
         private void RegisterAll(IDictionary<Type, (Handle<IMessage>, Type)> messageTypeToDelegateType)

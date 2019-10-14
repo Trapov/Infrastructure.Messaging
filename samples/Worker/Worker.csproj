@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,9 +12,13 @@
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.2.0" />
 
-    <PackageReference Include="Common.Infrastructure.Messaging.Extensions.DependencyInjection" Version="0.1.0" />
-    <PackageReference Include="Common.Infrastructure.Messaging.RabbitMQ" Version="0.1.0" />
-    <PackageReference Include="Common.Infrastructure.Messaging" Version="0.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Infrastructure.Messaging.Extensions.DependencyInjection\Infrastructure.Messaging.Extensions.DependencyInjection.csproj" />
+    <ProjectReference Include="..\..\src\Infrastructure.Messaging.InMemory\Infrastructure.Messaging.InMemory.csproj" />
+    <ProjectReference Include="..\..\src\Infrastructure.Messaging.RabbitMQ\Infrastructure.Messaging.RabbitMQ.csproj" />
+    <ProjectReference Include="..\..\src\Infrastructure.Messaging\Infrastructure.Messaging.csproj" />
   </ItemGroup>
 
   <ItemGroup>

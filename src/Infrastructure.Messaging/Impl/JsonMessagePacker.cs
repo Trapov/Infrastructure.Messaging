@@ -1,20 +1,33 @@
 ﻿namespace Infrastructure.Messaging
 {
-    using Newtonsoft.Json;
     using System;
     using System.Threading;
+    using System.Text.Json;
     using System.Threading.Tasks;
+    using System.IO;
+    using System.Text;
 
     public sealed class JsonMessagePacker : IMessagePacker
     {
-        public Task<object> Pack(IMessage message, CancellationToken cancellationToken)
+        private readonly JsonSerializerOptions _options;
+
+        public JsonMessagePacker(JsonSerializerOptions options)
         {
-            return Task.FromResult((object)JsonConvert.SerializeObject(message, Formatting.Indented));
+            _options = options;
         }
 
-        public Task<IMessage> Unpack(object messageObj, Type typeToUnpack, CancellationToken cancellationToken)
+        public ValueTask<object> Pack(IMessage message, CancellationToken cancellationToken)
         {
-            return Task.FromResult((IMessage)JsonConvert.DeserializeObject((string)messageObj, typeToUnpack));
+            return new ValueTask<object>(
+                JsonSerializer.Serialize(message, inputType: message.GetType(), options: _options)
+            );
+        }
+
+        public async ValueTask<IMessage> Unpack(object messageObj, Type typeToUnpack, CancellationToken cancellationToken)
+        {
+            using var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes((string)messageObj));
+
+            return (IMessage)await JsonSerializer.DeserializeAsync(memoryStream, typeToUnpack, _options, cancellationToken: cancellationToken);
         }
     }
 }

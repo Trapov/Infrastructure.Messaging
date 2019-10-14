@@ -6,10 +6,10 @@
 
     public interface IMessagePacker
     {
-        Task<object> Pack(
+        ValueTask<object> Pack(
             IMessage message,
             CancellationToken cancellationToken);
-        Task<IMessage> Unpack(
+        ValueTask<IMessage> Unpack(
             object messageObj,
             Type typeToUnpack,
             CancellationToken cancellationToken);
