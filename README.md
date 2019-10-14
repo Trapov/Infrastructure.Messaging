@@ -8,11 +8,16 @@ Library for messaging between services.
 |Infrastructure.Messaging|[![Build Status](https://travis-ci.com/Trapov/Infrastructure.Messaging.svg?branch=master)](https://travis-ci.com/Trapov/Infrastructure.Messaging)|
 
 # Requirements
-.NETStandard 2.1
+-- .NETStandard 2.1
+
 -- Microsoft.Extensions.DependencyInjection (>= 3.0.0)
 -- Microsoft.Extensions.DependencyInjection.Abstractions (>= 3.0.0)
 -- Microsoft.Extensions.Logging.Abstractions (>= 3.0.0)
 -- System.Text.Json (>= 4.6.0)
+
+# Demo
+
+![messaging.gif](messaging.gif)
 
 # Installation
 
@@ -65,7 +70,7 @@ public sealed class TestMessageHandler :
     public async Task Handle(TestMessage message, CancellationToken cancellationToken)
     {
         await Task.Delay(100);
-        //_logger.LogInformation("Test message was dispached {message}", message.Ping);
+        _logger.LogInformation("Test message was dispached {message}", message.Ping);
         throw new Exception("AASDSD");
     }
 
@@ -75,4 +80,23 @@ public sealed class TestMessageHandler :
         return Task.CompletedTask;
     }
 }
+```
+
+Use `IMessageRouter.Route()` to start the routing process and `IMessagePublisher` to publish a message.
+
+```cs
+public async Task Main()
+{
+	//..
+	MessageRouter = serviceProvider.GetRequiredService<IMessageRouter>();
+    CancellationTokenSource = new CancellationTokenSource();
+    Publisher = serviceProvider.GetRequiredService<IMessagePublisher>();
+	//..
+
+	await Publisher.Publish(new TestMessage { Ping = "A" }, cancellationToken: CancellationTokenSource.Token);
+	
+	// ..
+	await MessageRouter.Route(cancellationToken: CancellationTokenSource.Token);
+}
+
 ```
