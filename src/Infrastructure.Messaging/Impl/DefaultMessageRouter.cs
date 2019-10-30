@@ -53,7 +53,7 @@
             await foreach (var handlingProcess in _messageReceiver.Receive(cancellationToken))
             {
                 Stopwatch stopWatch = null;
-                _logger.IsEnabled(LogLevel.Trace);
+                if (_logger.IsEnabled(LogLevel.Trace))
                 {
                     stopWatch = new Stopwatch();
                     stopWatch.Start();
@@ -66,24 +66,33 @@
                 var handler = (IMessageHandler)scope.ServiceProvider.GetService(handlerType);
 
                 _logger.LogTrace(
-                    message: LogMessageHandlingTemplate, 
+                    message: LogMessageHandlingTemplate,
                     Thread.CurrentThread.ManagedThreadId, messageType, handlerType
                 );
 
                 // We do busy-waiting instead of Task.Delay because it's cheaper to await on remove/add-misses because they're quick, rather than yield to another thread.
-                var handlerTask = ToHandler(
-                    handler: handler,
-                    handlingProcess: handlingProcess,
-                    handlerDelegate: handlerDelegate,
-                    cancellationToken: cancellationToken
-                ).AnywayContinuation(action: task =>
+                var handlerTask = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await handler
+                            .Handle(handlingProcess.Message, handlerDelegate, cancellationToken)
+                            .ConfigureAwait(false);
+
+                        handlingProcess.ToHandled();
+                    }
+                    catch (Exception exception)
+                    {
+                        handlingProcess.ToError(exception);
+                    }
+                }).AnywayContinuation(action: task =>
                 {
                     // Busy-waiting
                     RunningTask removedTask;
                     while (!_runningTasks.TryRemove(task.Id, out removedTask))
                         _spinForRemove.SpinOnce();
 
-                    _logger.IsEnabled(LogLevel.Trace);
+                    if (_logger.IsEnabled(LogLevel.Trace))
                     {
                         stopWatch.Stop();
                         _logger.LogTrace(
@@ -100,29 +109,6 @@
                 _logger.LogTrace(
                      message: LogMessageAddedForHandling, Thread.CurrentThread.ManagedThreadId, messageType.Name, handlerTask.Id
                  );
-            }
-        }
-
-        private static async Task ToHandler(
-            IMessageHandler handler,
-            HandlingProcessFor<IMessage> handlingProcess,
-            Handle<IMessage> handlerDelegate,
-            CancellationToken cancellationToken)
-        {
-            // If handler runs synchronosly then it might block the others so we will yield to another thread implicitly.
-            await Task.Yield();
-
-            try
-            {
-                await handler
-                    .Handle(handlingProcess.Message, handlerDelegate, cancellationToken)
-                    .ConfigureAwait(false);
-
-                handlingProcess.ToHandled();
-            }
-            catch (Exception exception)
-            {
-                handlingProcess.ToError(exception);
             }
         }
     }

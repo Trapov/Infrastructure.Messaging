@@ -17,7 +17,7 @@ jobs:
       script: 
         - "sudo snap alias dotnet-sdk.dotnet dotnet"
         - "dotnet build -c Release"
-        - "cd src/Infrastructure.Messaging && dotnet pack /p:PackageVersion=1.0.$TRAVIS_BUILD_NUMBER -c Release && cd bin/Release && dotnet nuget push Common.Infrastructure.Messaging.1.0.$TRAVIS_BUILD_NUMBER.nupkg -k $NUGET_API_KEY -s https://api.nuget.org/v3/index.json"
+        - "cd src/Infrastructure.Messaging && dotnet pack /p:PackageVersion=1.1.$TRAVIS_BUILD_NUMBER -c Release && cd bin/Release && dotnet nuget push Common.Infrastructure.Messaging.1.1.$TRAVIS_BUILD_NUMBER.nupkg -k $NUGET_API_KEY -s https://api.nuget.org/v3/index.json"
       stage: dotnet-build-messaging
     - 
       script: 
