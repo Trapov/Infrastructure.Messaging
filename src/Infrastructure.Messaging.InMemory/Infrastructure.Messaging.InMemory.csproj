@@ -6,7 +6,7 @@
     <PackageId>Common.Infrastructure.Messaging.InMemory</PackageId>
     <PackageProjectUrl>https://github.com/Trapov/Infrastructure.Messaging</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Trapov/Infrastructure.Messaging</RepositoryUrl>
-    <Version>1.0.0</Version>
+    <Version>1.0.11</Version>
     <Authors>dmitriy afonin</Authors>
     <Company> __ </Company>
   
