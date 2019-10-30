@@ -17,25 +17,25 @@ jobs:
       script: 
         - "sudo snap alias dotnet-sdk.dotnet dotnet"
         - "dotnet build -c Release"
-        - "cd src/Infrastructure.Messaging && dotnet pack /p:PackageVersion=1.1.11+build.$TRAVIS_BUILD_NUMBER -c Release && cd bin/Release && dotnet nuget push Common.Infrastructure.Messaging.1.1.11+build.$TRAVIS_BUILD_NUMBER.nupkg -k $NUGET_API_KEY -s https://api.nuget.org/v3/index.json"
+        - "cd src/Infrastructure.Messaging && dotnet pack /p:PackageVersion=1.1.11-build.$TRAVIS_BUILD_NUMBER -c Release && cd bin/Release && dotnet nuget push Common.Infrastructure.Messaging.1.1.11-build.$TRAVIS_BUILD_NUMBER.nupkg -k $NUGET_API_KEY -s https://api.nuget.org/v3/index.json"
       stage: dotnet-build-messaging
     - 
       script: 
         - "sudo snap alias dotnet-sdk.dotnet dotnet"
         - "dotnet build -c Release"
-        - "cd src/Infrastructure.Messaging.RabbitMQ && dotnet pack /p:PackageVersion=1.0.11+build.$TRAVIS_BUILD_NUMBER -c Release && cd bin/Release && dotnet nuget push Common.Infrastructure.Messaging.RabbitMQ.1.0.11+build.$TRAVIS_BUILD_NUMBER.nupkg -k $NUGET_API_KEY -s https://api.nuget.org/v3/index.json"
+        - "cd src/Infrastructure.Messaging.RabbitMQ && dotnet pack /p:PackageVersion=1.0.11-build.$TRAVIS_BUILD_NUMBER -c Release && cd bin/Release && dotnet nuget push Common.Infrastructure.Messaging.RabbitMQ.1.0.11-build.$TRAVIS_BUILD_NUMBER.nupkg -k $NUGET_API_KEY -s https://api.nuget.org/v3/index.json"
       stage: dotnet-build-rabbit-mq
     - 
       script: 
         - "sudo snap alias dotnet-sdk.dotnet dotnet"
         - "dotnet build -c Release"
-        - "cd src/Infrastructure.Messaging.InMemory && dotnet pack /p:PackageVersion=1.0.11+build.$TRAVIS_BUILD_NUMBER -c Release && cd bin/Release && dotnet nuget push Common.Infrastructure.Messaging.InMemory.1.0.11+build.$TRAVIS_BUILD_NUMBER.nupkg -k $NUGET_API_KEY -s https://api.nuget.org/v3/index.json"
+        - "cd src/Infrastructure.Messaging.InMemory && dotnet pack /p:PackageVersion=1.0.11-build.$TRAVIS_BUILD_NUMBER -c Release && cd bin/Release && dotnet nuget push Common.Infrastructure.Messaging.InMemory.1.0.11-build.$TRAVIS_BUILD_NUMBER.nupkg -k $NUGET_API_KEY -s https://api.nuget.org/v3/index.json"
       stage: dotnet-build-in-memory
     - 
       script: 
         - "sudo snap alias dotnet-sdk.dotnet dotnet"
         - "dotnet build -c Release"
-        - "cd src/Infrastructure.Messaging.Extensions.DependencyInjection && dotnet pack /p:PackageVersion=1.0.11+build.$TRAVIS_BUILD_NUMBER -c Release && cd bin/Release && dotnet nuget push Common.Infrastructure.Messaging.Extensions.DependencyInjection.1.0.11+build.$TRAVIS_BUILD_NUMBER.nupkg -k $NUGET_API_KEY -s https://api.nuget.org/v3/index.json"
+        - "cd src/Infrastructure.Messaging.Extensions.DependencyInjection && dotnet pack /p:PackageVersion=1.0.11-build.$TRAVIS_BUILD_NUMBER -c Release && cd bin/Release && dotnet nuget push Common.Infrastructure.Messaging.Extensions.DependencyInjection.1.0.11-build.$TRAVIS_BUILD_NUMBER.nupkg -k $NUGET_API_KEY -s https://api.nuget.org/v3/index.json"
       stage: dotnet-build-dependency-injection
 language: csharp
 mono: none
